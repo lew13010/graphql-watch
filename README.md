@@ -5,7 +5,7 @@ This project aims at doing technology watch on graphql, configuration in a Symfo
 
 For start the project, simply run the command `docker-compose up -d` at the root of the project.
 
-Enter the `elastic_symfony` container with command `docker exec -it graphql_symfony bash;`.
+Enter the `graphql_symfony` container with command `docker exec -it graphql_symfony bash;`.
 
 Install the dependencies with `composer install` in container.
 
