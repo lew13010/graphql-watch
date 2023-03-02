@@ -1,21 +1,47 @@
-version: '3'
-
+version: '3.7'
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-15}-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
-    volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
 
-volumes:
-###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
+  symfony:
+    container_name: graphql_symfony
+    build:
+      context: .docker/symfony
+      args:
+        TIMEZONE: 'Europe/Paris'
+        GIT_USER_EMAIL: 'loic@devlt.fr'
+        GIT_USER_NAME: 'Loic Trancon'
+    volumes:
+      - ./:/var/www/symfony
+    networks:
+      - symfony
+
+  nginx:
+    container_name: graphql_nginx
+    build:
+      context: .docker/nginx
+    volumes:
+      - ./:/var/www/symfony
+    env_file:
+      - .docker/.env.nginx
+    ports:
+      - 8013:80
+    networks:
+      - symfony
+
+  ###> doctrine/doctrine-bundle ###
+  database:
+    container_name: graphql_database
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: graphql
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: graphql
+    volumes:
+      - ./.docker/db/data:/var/lib/postgresql/data:rw
+    ports:
+      - 5435:5432
+    networks:
+      - symfony
+  ###< doctrine/doctrine-bundle ###
+
+networks:
+  symfony:
